@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
 import {
   ClerkProvider,
-  Show,
+  SignedIn,
+  SignedOut,
   SignInButton,
   SignUpButton,
   UserButton,
@@ -31,43 +31,36 @@ export const metadata: Metadata = {
   description: "Generate fantasy football newsletters from YouTube transcripts",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userId } = await auth();
-  const signedOut = !userId;
-
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${merriweather.variable} antialiased`}
-      >
-        <ClerkProvider>
-          <header
-            className={`flex justify-between items-center p-4 gap-4 h-16 border-b ${
-              signedOut ? "border-emerald-700 bg-emerald-600 text-white" : "border-zinc-100 bg-white"
-            }`}
-          >
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${merriweather.variable} antialiased`}
+        >
+          <header className="flex justify-between items-center p-4 gap-4 h-16 border-b border-zinc-100 bg-white">
             <div className="font-bold text-lg tracking-tight">
               Tape
-              <span className={signedOut ? "text-emerald-200" : "text-emerald-600"}>2</span>
+              <span className="text-emerald-600">2</span>
               Text
             </div>
             <div className="flex gap-4 items-center">
-              <Show when="signed-out">
+              <SignedOut>
                 <SignInButton />
                 <SignUpButton />
-              </Show>
-              <Show when="signed-in">
+              </SignedOut>
+              <SignedIn>
                 <UserButton />
-              </Show>
+              </SignedIn>
             </div>
           </header>
           {children}
-        </ClerkProvider>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
