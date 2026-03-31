@@ -293,7 +293,7 @@ export default function NewsletterApp({ initialNewsletters }: NewsletterAppProps
                 {rejectedFantasyLinks.length > 0 && (
                   <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
                     <p className="text-sm font-semibold text-red-700 mb-3">
-                      ⚠️ Not treated as fantasy football ({rejectedFantasyLinks.length})
+                      ⚠️ Not fantasy football content — videos must be fantasy football related ({rejectedFantasyLinks.length})
                     </p>
                     <div className="space-y-2">
                       {rejectedFantasyLinks.map((link) => (
@@ -479,7 +479,7 @@ export default function NewsletterApp({ initialNewsletters }: NewsletterAppProps
             {/* Rejected / failed links in add mode */}
             {rejectedFantasyLinks.length > 0 && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg space-y-2">
-                <p className="text-xs font-semibold text-red-600">Not treated as fantasy football:</p>
+                <p className="text-xs font-semibold text-red-600">Not fantasy football content — videos must be fantasy football related:</p>
                 {rejectedFantasyLinks.map((link) => (
                   <div key={link.id} className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
