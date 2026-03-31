@@ -41,7 +41,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${merriweather.variable} antialiased`}
         >
-          <header className="flex justify-between items-center p-4 gap-4 h-16 border-b border-zinc-100 bg-white">
+          <header className="flex justify-between items-center p-4 gap-4 h-16 border-b border-zinc-200 bg-white text-zinc-900">
             <div className="font-bold text-lg tracking-tight">
               Tape
               <span className="text-emerald-600">2</span>
@@ -49,8 +49,16 @@ export default function RootLayout({
             </div>
             <div className="flex gap-4 items-center">
               <Show when="signed-out">
-                <SignInButton />
-                <SignUpButton />
+                <SignInButton>
+                  <button className="text-sm font-medium text-zinc-700 hover:text-zinc-900 px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+                    Sign in
+                  </button>
+                </SignInButton>
+                <SignUpButton>
+                  <button className="text-sm font-medium bg-zinc-900 text-white px-3 py-1.5 rounded-lg hover:bg-zinc-700 transition-colors">
+                    Sign up
+                  </button>
+                </SignUpButton>
               </Show>
               <Show when="signed-in">
                 <UserButton />

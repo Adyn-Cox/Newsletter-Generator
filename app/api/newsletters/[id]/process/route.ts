@@ -1,7 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { YoutubeTranscript } from 'youtube-transcript'
 import Anthropic from '@anthropic-ai/sdk'
 import { NEWSLETTER_WRITER_SYSTEM, buildNewsletterUserMessage } from '@/lib/prompts/newsletter-writer'
 
@@ -40,7 +39,7 @@ function parseExtractionJson(raw: string): ExtractionResult {
 
 async function extractFromTranscript(
   transcript: string,
-  logCtx: { linkId: string; youtubeUrl: string; segmentCount: number }
+  logCtx: { linkId: string; youtubeUrl: string }
 ): Promise<ExtractionResult> {
   const message = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
@@ -83,7 +82,6 @@ If isFantasyFootball is false, return: {"isFantasyFootball": false}
   console.info('[newsletter-process] haiku response', {
     linkId: logCtx.linkId,
     youtubeUrl: logCtx.youtubeUrl,
-    segmentCount: logCtx.segmentCount,
     transcriptChars: transcript.length,
     responseChars: text.length,
     responsePreview: text.slice(0, 500),
@@ -152,13 +150,19 @@ export async function POST(
     })
 
     try {
-      const segments = await YoutubeTranscript.fetchTranscript(link.youtubeUrl)
-      const transcript = segments.map((s) => s.text).join(' ')
+      const supadataRes = await fetch(
+        `https://api.supadata.ai/v1/youtube/transcript?url=${encodeURIComponent(link.youtubeUrl)}&text=true`,
+        { headers: { 'x-api-key': process.env.SUPADATA_KEY! } }
+      )
+      if (!supadataRes.ok) {
+        const err = await supadataRes.json().catch(() => ({}))
+        throw new Error(err.message || `Supadata error ${supadataRes.status}`)
+      }
+      const { content: transcript } = await supadataRes.json()
 
       console.info('[newsletter-process] youtube transcript', {
         linkId: link.id,
         youtubeUrl: link.youtubeUrl,
-        segmentCount: segments.length,
         transcriptChars: transcript.length,
         transcriptHead: transcript.slice(0, 280).replace(/\s+/g, ' '),
         transcriptTail: transcript.slice(-280).replace(/\s+/g, ' '),
@@ -167,7 +171,6 @@ export async function POST(
       const result = await extractFromTranscript(transcript, {
         linkId: link.id,
         youtubeUrl: link.youtubeUrl,
-        segmentCount: segments.length,
       })
 
       if (!result.isFantasyFootball) {
