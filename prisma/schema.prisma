@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  draft     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  links NewsletterLink[]
+
+  @@index([userId])
+}
+
+model NewsletterLink {
+  id           String     @id @default(cuid())
+  newsletterId String
+  youtubeUrl   String
+  videoTitle   String?
+  status       LinkStatus @default(PENDING)
+  errorMessage String?
+  addedAt      DateTime   @default(now())
+
+  newsletter Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+  summary    Summary?
+
+  @@unique([newsletterId, youtubeUrl])
+}
+
+enum LinkStatus {
+  PENDING
+  PROCESSING
+  INVALID
+  PROCESSED
+  FAILED
+}
+
+model Summary {
+  id                   String   @id @default(cuid())
+  newsletterLinkId     String   @unique
+  newsletterId         String
+  videoTitle           String
+  keyTakeaways         String[]
+  playerHighlights     String[]
+  paragraph            String
+  suggestedSubjectLine String
+  originalTranscript   String   @db.Text
+  createdAt            DateTime @default(now())
+
+  link NewsletterLink @relation(fields: [newsletterLinkId], references: [id], onDelete: Cascade)
+}
